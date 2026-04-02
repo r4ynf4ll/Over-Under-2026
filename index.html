@@ -331,13 +331,16 @@
     select {
       width: 100%;
       appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 9'%3E%3Cpath fill='%23d3dded' d='M1.4 1.2a1 1 0 0 1 1.4 0L7 5.4l4.2-4.2a1 1 0 0 1 1.4 1.4L7.7 7.5a1 1 0 0 1-1.4 0L1.4 2.6a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E") no-repeat right 14px center / 14px 9px,
         linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04)),
         rgba(8, 16, 29, 0.9);
       color: var(--text);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 16px;
-      padding: 12px 16px;
+      padding: 12px 44px 12px 16px;
       font: inherit;
       font-size: 0.98rem;
       outline: none;
@@ -507,6 +510,16 @@
       color: #9af0b9;
     }
 
+    .guess-cell.over {
+      background: rgba(91, 155, 255, 0.18);
+      color: #b8d3ff;
+    }
+
+    .guess-cell.under {
+      background: rgba(255, 165, 77, 0.18);
+      color: #ffd3a6;
+    }
+
     .guess-cell.wrong {
       background: rgba(255, 107, 107, 0.18);
       color: #ff9d9d;
@@ -528,16 +541,31 @@
     }
 
     .result-pill.over {
-      background: rgba(255, 107, 107, 0.18);
-      color: #ffb7b7;
+      background: rgba(91, 155, 255, 0.18);
+      color: #b8d3ff;
     }
 
     .result-pill.under {
+      background: rgba(255, 165, 77, 0.18);
+      color: #ffd3a6;
+    }
+
+    .result-pill.unknown {
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+    }
+
+    .verdict-pill.correct {
       background: rgba(104, 211, 145, 0.18);
       color: #bbf4cd;
     }
 
-    .result-pill.unknown {
+    .verdict-pill.wrong {
+      background: rgba(255, 107, 107, 0.18);
+      color: #ffb7b7;
+    }
+
+    .verdict-pill.unknown {
       background: rgba(255,255,255,0.06);
       color: var(--muted);
     }
@@ -1012,14 +1040,6 @@ Laura,Under 79.5,Over 87.5,Under 85.5,Over 87.5,Over 88.5,Under 67.5,Over 80.5,O
           <span class="mini-label">Accuracy</span>
           <div class="mini-value">${player.pct.toFixed(1)}%</div>
         </div>
-        <div class="mini-card">
-          <span class="mini-label">Best guess</span>
-          <div class="mini-value">${escapeHTML(player.details.find((item) => item.isCorrect)?.teamName || 'None yet')}</div>
-        </div>
-        <div class="mini-card">
-          <span class="mini-label">Participant</span>
-          <div class="mini-value">${escapeHTML(player.displayName)}</div>
-        </div>
       `;
     }
 
@@ -1029,10 +1049,11 @@ Laura,Under 79.5,Over 87.5,Under 85.5,Over 87.5,Over 88.5,Under 67.5,Over 80.5,O
       renderSummary(player);
 
       els.detailBody.innerHTML = player.details.map((item) => {
-        const guessClass = item.isCorrect == null ? 'unknown' : item.isCorrect ? 'correct' : 'wrong';
+        const guessClass = item.guessSide ? item.guessSide.toLowerCase() : 'unknown';
         const currentClass = item.current ? item.current.toLowerCase() : 'unknown';
         const currentLabel = item.current || 'Unknown';
         const guessLabel = item.guessText || '—';
+        const verdictClass = item.isCorrect == null ? 'unknown' : item.isCorrect ? 'correct' : 'wrong';
         const verdict = item.isCorrect == null ? 'Not scored' : item.isCorrect ? 'Correct' : 'Wrong';
 
         return `
@@ -1042,7 +1063,7 @@ Laura,Under 79.5,Over 87.5,Under 85.5,Over 87.5,Over 88.5,Under 67.5,Over 80.5,O
             <td class="center">${formatPct(item.winPct)}</td>
             <td class="center"><span class="result-pill ${currentClass}">${escapeHTML(currentLabel)}</span></td>
             <td class="guess-cell ${guessClass}">${escapeHTML(guessLabel)}</td>
-            <td class="center">${escapeHTML(verdict)}</td>
+            <td class="center"><span class="result-pill verdict-pill ${verdictClass}">${escapeHTML(verdict)}</span></td>
           </tr>
         `;
       }).join('');
